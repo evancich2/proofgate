@@ -1,12 +1,12 @@
-// cbmc: --unwind 128 --arrays-uf-always
+// cbmc: --unwind 34
 //
-// Complete: every legal route and register value, every capacity up to the
-// server's body buffer.
+// Bounded: every legal route and register value for readings of up to 8
+// registers, and every capacity up to 128 bytes.
 #include "harness.h"
 #include "proofgate/api.h"
 #include "proofgate/modbus.h"
 
-#define OUT_MAX 900u
+#define OUT_MAX 128u
 
 int main(void)
 {
@@ -20,7 +20,7 @@ int main(void)
     r.addr = nondet_u16();
     r.count = nondet_u16();
     __CPROVER_assume(cap <= OUT_MAX);
-    __CPROVER_assume(r.count >= 1u && r.count <= MB_MAX_REGS);
+    __CPROVER_assume(r.count >= 1u && r.count <= 8u);
 
     size_t n = api_render_registers(out, cap, &r, values);
 
@@ -28,7 +28,7 @@ int main(void)
     PG_REACH(n == 0u, "capacity refused");
     PG_PROVE(n <= cap, "never reports more than capacity");
     if (cap == OUT_MAX) {
-        PG_PROVE(n != 0u, "worst-case reading always fits the server buffer size");
+        PG_PROVE(n != 0u, "worst-case 8-register reading fits 128 bytes");
     }
     return 0;
 }

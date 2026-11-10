@@ -1,11 +1,11 @@
-// cbmc: --unwind 44
+// cbmc: --unwind 28
 //
 // All byte strings of every length up to INPUT_MAX, plus a larger declared
 // length is not modelled here: the bound is reported in VERIFICATION.md.
 #include "harness.h"
 #include "proofgate/http.h"
 
-#define INPUT_MAX 40u
+#define INPUT_MAX 24u
 
 int main(void)
 {

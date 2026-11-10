@@ -6,6 +6,9 @@ shell.
 
 ## Proof depth
 
+- [ ] Finish the three proofs that do not complete yet: `http_parse`,
+      `api_render` and `tlv8_fragments`, using function contracts or smaller
+      compositional harnesses (8h)
 - [ ] Replace the bounded HTTP proof with loop contracts or Frama-C WP, so it
       covers the full 8 KB head (12h)
 - [ ] Prove `tlv8_next` termination and reassembly for inputs of any length (4h)

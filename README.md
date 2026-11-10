@@ -17,11 +17,12 @@ failure matters.
 
 | Area | State |
 | --- | --- |
-| HTTP/1.1 server (GET only, pipelining, timeouts, 64 connections) | Working, parser checked |
-| REST routing and JSON rendering | Working, checked |
-| Modbus TCP read holding and input registers (FC 3 and 4) | Working, codec checked |
-| MQTT 3.1.1 PUBLISH decoder | Codec only, checked, not connected to the server yet |
-| HomeKit TLV8 codec | Codec only, checked, not connected to the server yet |
+| HTTP/1.1 server (GET only, pipelining, timeouts, 64 connections) | Working and tested. Head-size limit proved, full parser proof not finished |
+| REST routing | Working, proved for bounded inputs |
+| JSON rendering | Working and tested, proof not finished |
+| Modbus TCP read holding and input registers (FC 3 and 4) | Working, codec proved |
+| MQTT 3.1.1 PUBLISH decoder | Codec only, proved for bounded packets, not connected to the server yet |
+| HomeKit TLV8 codec | Codec only, not connected to the server yet. Short items proved, fragment reassembly proof not finished |
 | HomeKit pairing, sessions and accessories | Not started, see [ROADMAP.md](ROADMAP.md) |
 | DNP3, OPC UA, Zigbee, Matter | Not started, see [ROADMAP.md](ROADMAP.md) |
 | TLS and authentication | Not started. Keep the default loopback bind. |
@@ -29,12 +30,16 @@ failure matters.
 ## What is verified, and what is not
 
 The pure codecs (`src/http.c`, `src/api.c`, `src/modbus.c`, `src/mqtt.c`,
-`src/tlv8.c`) do no allocation and no I/O. For these, CBMC checks memory safety,
-absence of undefined behaviour and arithmetic overflow, and functional
+`src/tlv8.c`) do no allocation and no I/O. CBMC harnesses for them check memory
+safety, absence of undefined behaviour and arithmetic overflow, and functional
 properties, with a reachability check so that no proof passes vacuously.
 
+**Seven of the ten proofs pass. Three do not finish yet within the limits
+used:** the full HTTP parser, JSON rendering and TLV8 fragment reassembly. None
+has found a defect, but none counts as proved.
+
 `src/main.c`, which owns sockets, timers and connection state, is ordinary
-unverified C. Some proofs are bounded to short inputs. **proofgate is not a
+unverified C. Some passing proofs are bounded to short inputs. **proofgate is not a
 fully verified web server.** [VERIFICATION.md](VERIFICATION.md) lists each
 proof, its bound and the remaining trust assumptions.
 
@@ -47,7 +52,7 @@ also need `curl`, and the proofs need [CBMC](https://github.com/diffblue/cbmc).
 make                 # builds build/proofgate
 make test            # unit tests under ASan and UBSan
 make e2e             # the real server against a simulated Modbus device
-make verify          # every CBMC proof; the largest need a lot of memory
+make verify          # every CBMC proof; three need more memory and time than most machines have
 make proof-tlv8_find # one proof
 ```
 

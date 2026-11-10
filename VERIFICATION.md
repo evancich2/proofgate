@@ -30,33 +30,37 @@ C library model. "Functional" counts the `PG_PROVE` assertions in the harness.
 | `api_route` | Pass | 1721 (4) | Bounded path and query lengths |
 | `http_too_long` | Pass | 1728 (1) | Scan limit, with a reduced `HTTP_MAX_HEAD` |
 | `tlv8_find` | Pass | 1719 (1) | Bounded: short items |
-| `http_parse` | Not yet confirmed | | Inputs up to 40 bytes |
-| `tlv8_fragments` | Not yet confirmed | | A full 255-byte fragment and a continuation |
-| `api_render` | Not yet confirmed | | Every legal route and value, capacity up to 900 bytes |
+| `http_parse` | **Not finished** | | Inputs up to 24 bytes. Ran out of memory at 40 bytes under an 8 GB limit; timed out at 24 |
+| `tlv8_fragments` | **Not finished** | | A full 255-byte fragment and a continuation. Timed out after 15 minutes |
+| `api_render` | **Not finished** | | Up to 8 registers, capacity up to 128 bytes. Timed out after 10 minutes; the full 125-register version ran out of memory |
+
+"Not finished" means CBMC gave no verdict, so those harnesses prove nothing yet.
+No run has produced a counterexample. Their target properties are listed below
+and marked *(unfinished)*.
 
 ## Main functional properties
 
-- **HTTP:** accepted requests have their head inside the input and ending in
+- **HTTP** *(unfinished, except the size limit)***:** accepted requests have their head inside the input and ending in
   CRLFCRLF. Target, path, query and headers stay inside the head. Header count
   and content length stay within limits. Oversized input is refused rather than
   waited on forever.
 - **Routing:** unit IDs are legal, only read functions are produced, counts are
   in range, and a read range stays inside the address space.
-- **Rendering:** output never exceeds capacity.
+- **Rendering** *(unfinished)***:** output never exceeds capacity.
 - **Modbus:** encoded requests match the protocol fields byte for byte. Decoded
   replies match the requested transaction, unit and function, frame length
   matches quantity, and registers are the big-endian payload.
 - **MQTT:** topic and payload stay inside the packet, QoS is legal, a packet ID
   is present exactly when QoS is non-zero, and topics contain no wildcard or NUL.
 - **TLV8:** output stays within capacity, and overruns and small output buffers
-  are refused.
+  are refused. Fragment reassembly is *(unfinished)*.
 
 ## Limits and trust assumptions
 
 - `src/main.c` (sockets, timers, connection state) is **not verified**. It is
   covered only by unit-level sanitizer runs of the codecs and the end-to-end test.
 - Bounded proofs say nothing directly about inputs beyond their bound. The HTTP
-  parser in particular is proved for 40-byte inputs, while the server accepts
+  head-size check is proved only with a reduced limit, while the server accepts
   heads up to 8192 bytes. Closing this is the first item in
   [ROADMAP.md](ROADMAP.md).
 - The proofs check the C source. They trust CBMC, its C model and SAT solver,
