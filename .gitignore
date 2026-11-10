@@ -1,0 +1,9 @@
+build/
+*.o
+*.out
+*.goto
+.env
+.env.*
+!.env.example
+*.pem
+*.key
