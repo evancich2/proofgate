@@ -17,7 +17,7 @@ failure matters.
 
 | Area | State |
 | --- | --- |
-| HTTP/1.1 server (GET only, pipelining, timeouts, 64 connections) | Working and tested. Head-size limit proved, full parser proof not finished |
+| HTTP/1.1 server (GET only, pipelining, timeouts, 64 connections) | Working and tested. Head-size limit proved. Parser proof passes for inputs up to 24 bytes, its vacuity check is not finished |
 | REST routing | Working, proved for bounded inputs |
 | JSON rendering | Working and tested, proof not finished |
 | Modbus TCP read holding and input registers (FC 3 and 4) | Working, codec proved |
@@ -34,9 +34,10 @@ The pure codecs (`src/http.c`, `src/api.c`, `src/modbus.c`, `src/mqtt.c`,
 safety, absence of undefined behaviour and arithmetic overflow, and functional
 properties, with a reachability check so that no proof passes vacuously.
 
-**Seven of the ten proofs pass. Three do not finish yet within the limits
-used:** the full HTTP parser, JSON rendering and TLV8 fragment reassembly. None
-has found a defect, but none counts as proved.
+**Seven of the ten proofs pass in full.** The HTTP parser proof passes for
+inputs up to 24 bytes, but its vacuity check has not finished. The JSON rendering
+and TLV8 fragment reassembly proofs have not finished at all, so they prove
+nothing yet. No run has found a defect.
 
 `src/main.c`, which owns sockets, timers and connection state, is ordinary
 unverified C. Some passing proofs are bounded to short inputs. **proofgate is not a
@@ -52,7 +53,7 @@ also need `curl`, and the proofs need [CBMC](https://github.com/diffblue/cbmc).
 make                 # builds build/proofgate
 make test            # unit tests under ASan and UBSan
 make e2e             # the real server against a simulated Modbus device
-make verify          # every CBMC proof; three need more memory and time than most machines have
+make verify          # every CBMC proof; three need more memory and time than a typical machine has
 make proof-tlv8_find # one proof
 ```
 

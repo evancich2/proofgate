@@ -6,8 +6,8 @@ shell.
 
 ## Proof depth
 
-- [ ] Finish the three proofs that do not complete yet: `http_parse`,
-      `api_render` and `tlv8_fragments`, using function contracts or smaller
+- [ ] Finish the `http_parse` vacuity check and the `api_render` and
+      `tlv8_fragments` proofs, using function contracts or smaller
       compositional harnesses (8h)
 - [ ] Replace the bounded HTTP proof with loop contracts or Frama-C WP, so it
       covers the full 8 KB head (12h)

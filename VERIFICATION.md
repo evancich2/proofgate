@@ -30,30 +30,30 @@ C library model. "Functional" counts the `PG_PROVE` assertions in the harness.
 | `api_route` | Pass | 1721 (4) | Bounded path and query lengths |
 | `http_too_long` | Pass | 1728 (1) | Scan limit, with a reduced `HTTP_MAX_HEAD` |
 | `tlv8_find` | Pass | 1719 (1) | Bounded: short items |
-| `http_parse` | **Not finished** | | Inputs up to 24 bytes. Ran out of memory at 40 bytes under an 8 GB limit; timed out at 24 |
+| `http_parse` | **Proof pass, vacuity check not finished** | 1955 (15) | Inputs up to 24 bytes. The vacuity run timed out, so reachability is unconfirmed. At 40 bytes the proof ran out of memory under an 8 GB limit |
 | `tlv8_fragments` | **Not finished** | | A full 255-byte fragment and a continuation. Timed out after 15 minutes |
 | `api_render` | **Not finished** | | Up to 8 registers, capacity up to 128 bytes. Timed out after 10 minutes; the full 125-register version ran out of memory |
 
 "Not finished" means CBMC gave no verdict, so those harnesses prove nothing yet.
 No run has produced a counterexample. Their target properties are listed below
-and marked *(unfinished)*.
+and marked as unfinished.
 
 ## Main functional properties
 
-- **HTTP** *(unfinished, except the size limit)***:** accepted requests have their head inside the input and ending in
+- **HTTP (vacuity check unfinished, except for the size limit):** accepted requests have their head inside the input and ending in
   CRLFCRLF. Target, path, query and headers stay inside the head. Header count
   and content length stay within limits. Oversized input is refused rather than
   waited on forever.
 - **Routing:** unit IDs are legal, only read functions are produced, counts are
   in range, and a read range stays inside the address space.
-- **Rendering** *(unfinished)***:** output never exceeds capacity.
+- **Rendering (unfinished):** output never exceeds capacity.
 - **Modbus:** encoded requests match the protocol fields byte for byte. Decoded
   replies match the requested transaction, unit and function, frame length
   matches quantity, and registers are the big-endian payload.
 - **MQTT:** topic and payload stay inside the packet, QoS is legal, a packet ID
   is present exactly when QoS is non-zero, and topics contain no wildcard or NUL.
 - **TLV8:** output stays within capacity, and overruns and small output buffers
-  are refused. Fragment reassembly is *(unfinished)*.
+  are refused. Fragment reassembly is unfinished.
 
 ## Limits and trust assumptions
 
